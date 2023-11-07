@@ -1,0 +1,3 @@
+Vì dataset quá lớn nên tụi em không up lên github chung được. Tụi em xin gửi cô link nguồn của dataset ạ.
+
+https://snap.stanford.edu/data/amazon-meta.html
