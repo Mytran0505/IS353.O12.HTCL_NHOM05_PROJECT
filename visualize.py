@@ -2,7 +2,7 @@ from matplotlib import pylab, pyplot as plt
 import snap
 import pickle
 from project_helpers import read_data_from_binary
-
+from plots import plotDegreeDist, plotDegreeDist_mult
 #customers, products = read_data_from_binary()
 
 C_P_graph = snap.LoadEdgeList(snap.PUNGraph, "C_P_graph", 0, 1)
@@ -14,8 +14,8 @@ customer_product_weights = pickle.load(p)
 p.close()
 
 # Visualize C_P_graph
-#plotDegreeDist(C_P_graph, 'Customer - Product Graph Degree Distribution', 'r', 100, 0.00001)
-#plotDegreeDist_mult(C_P_graph, 'Customer - Product Graph Degree Distribution', 'r', 100, 0.00001, customers_int_to_string, 'Products')
+plotDegreeDist(C_P_graph, 'Customer - Product Graph Degree Distribution1', 'r', 100, 0.00001)
+plotDegreeDist_mult(C_P_graph, 'Customer - Product Graph Degree Distribution2', 'r', 100, 0.00001, customers_int_to_string, 'Products')
 
 print(len(customers_int_to_string)) # 9,740
 products_string_to_int = {y:x for x,y in products_int_to_string.iteritems()}
@@ -32,9 +32,9 @@ p.close()
 
 print(categories_int_to_tuple.values())
 
-# Visualize C_P_graph
-#plotDegreeDist(C_C_graph, 'Customer - Category Graph Degree Distribution', 'g', 10000, 0.0001)
-#plotDegreeDist_mult(C_C_graph, 'Customer - Category Graph Degree Distribution', 'g', 10000, 0.00005, customers_int_to_string, 'Categories')
+# Visualize C_C_graph
+plotDegreeDist(C_C_graph, 'Customer - Category Graph Degree Distribution1', 'g', 10000, 0.0001)
+plotDegreeDist_mult(C_C_graph, 'Customer - Category Graph Degree Distribution2', 'g', 10000, 0.00005, customers_int_to_string, 'Categories')
 
 print(C_C_graph.GetNodes()) # 9799 customers
 print(C_C_graph.GetEdges()) # 44040
@@ -43,7 +43,7 @@ print(len(categories_int_to_tuple)) # 84
 print(len(customer_category_weights)) # = number of edges
 
 ################# READ C_NET ###################
-'''
+
 print('Loading C_Net...')
 C_Net = snap.LoadEdgeList(snap.PUNGraph, "C_Net", 0, 1)
 
@@ -52,11 +52,11 @@ customer_weights = pickle.load(p)
 Cs = pickle.load(p)
 p.close()
 
-#plotDegreeDist(C_Net, 'Customer Network Degree Distribution', 'g', 10000, 0.0001)
+plotDegreeDist(C_Net, 'Customer Network Degree Distribution1', 'g', 10000, 0.0001)
 
 print(C_Net.GetNodes()) # 9057
 print(C_Net.GetEdges()) # 8,995,947
-'''
+
 print('BEGIN TESTS:')
 print('---------------------')
 ###### EDGES LISTS FOR INDUCED SUBGRAPHS ######

@@ -26,7 +26,9 @@ def read_data_from_binary():
     return customers, products
 
 def read_customers_original():
-    c = open("backups/customers.pkl", "rb")
+    print('Loading data... This takes ~ 90 seconds')
+    
+    c = open("customers.pkl", "rb")
     customers_original = pickle.load(c)
     c.close()
     return customers_original
@@ -52,12 +54,62 @@ def customer_product_graph(customers):
         if num_prod_i < 3:
             continue
 
-        if num_prod_i > 95:
-            print('MORE THAN 100')
+        if num_prod_i > 100:
+            # print('MORE THAN 100')
             continue
 
         if np.random.uniform() < 0.98:
             continue
+
+        # Add customer node to graph
+        customers_string_to_int[customer_i] = customer_counter # maps string customer id to an integer id 
+        C_P_graph.AddNode(customer_counter)
+        customer_counter += 1
+
+        for product_j in products_map_i: #loop over each product the customer bought
+            # if product not seen before, add as a node in graph. 
+            if (product_j not in products_string_to_int): 
+                products_string_to_int[product_j] = product_counter + cust_num
+                C_P_graph.AddNode(product_counter + cust_num) 
+                product_counter += 1    
+
+            # Add edge, store edge weight in map
+            values_of_product = customers[customer_i][product_j]
+            product_rating = values_of_product[0]
+            C_P_graph.AddEdge(customers_string_to_int[customer_i], products_string_to_int[product_j])
+            customer_product_weights[(customers_string_to_int[customer_i], products_string_to_int[product_j])] = product_rating
+
+    customers_int_to_string = {y:x for x,y in customers_string_to_int.iteritems()}
+    products_int_to_string = {y:x for x,y in products_string_to_int.iteritems()}
+
+    return C_P_graph, cust_num, customers_int_to_string, products_int_to_string, customer_product_weights, products_string_to_int
+
+def customer_product_graph_LARGE(customers):
+    customers_string_to_int = {}
+    products_string_to_int = {}
+    customer_product_weights = {} 
+
+    C_P_graph = snap.TUNGraph.New() 
+
+    cust_num = len(customers)
+
+    customer_counter = 0 
+    product_counter = 0 
+
+    for customer_i in customers:
+        products_map_i = customers[customer_i]
+        num_prod_i = len(products_map_i)
+
+        # If bought less than 3 products, discard
+        #if num_prod_i < 3:
+            #continue
+
+        #if num_prod_i > 100:
+            # print('MORE THAN 100')
+            #continue
+
+        #if np.random.uniform() < 0.98:
+            #continue
 
         # Add customer node to graph
         customers_string_to_int[customer_i] = customer_counter # maps string customer id to an integer id 
@@ -217,6 +269,7 @@ def customer_graph(C_C_graph, customers_int_to_string, customer_category_weights
 def split_communities(C_Net):
     CmtyV = snap.TCnComV()
     modularity = snap.CommunityCNM(C_Net, CmtyV)
+    print('Number of communities:')
     print(len(CmtyV)) # number of communities
     Cs = []
     for Cmty in CmtyV:
@@ -284,8 +337,7 @@ def find_category_experts(C_Net, customers, customer_id, Cs, cat_tuple, customer
             frac_helpful = 0.3 # nobody has rated the review, fair prior
 
         # finally, compute expert score
-        sh_path = snap.GetShortPath(C_Net, customer_id, n)         # TODO: try removing total_products_n
-        expert_scores[n] =  frac_reviews * frac_helpful * av_rating * (1 / np.log(sh_path + 1)) * customer_weights[(min(n, customer_id), max(n, customer_id))] * np.log(total_products_n + 1)
+        expert_scores[n] =  frac_reviews * av_rating * (frac_helpful * 1 / abs(total_products_n)) * customer_weights[(min(n, customer_id), max(n, customer_id))] * np.log(abs(total_products_n))
         expert_score_info[n] = [frac_reviews, frac_helpful, total_products_n, customer_weights[(min(n, customer_id), max(n, customer_id))]]
     # Return 100 experts ranked
     experts = sorted(expert_scores, key=expert_scores.get, reverse=True)[:100]
@@ -372,7 +424,7 @@ def recommendation(graph, node_Id, tuple_requested, customers, products, custome
     cat_requested = tuple_requested[1]
     i = 0
 
-    #find the top 3 products of the requested category (3 with highest ratings)
+    #find the top 5 products of the requested category (5 with highest ratings)
     for similar_node in neighbors:
         all_purchases = customers[customers_int_to_string[similar_node]] #that is a map 
         i += 1
@@ -381,7 +433,6 @@ def recommendation(graph, node_Id, tuple_requested, customers, products, custome
             product_group = product_features["group"]
             product_categories = product_features["categories"]
 
-            # TODO: Switch this around, to make more general?
             if (product_group == group_requested and cat_requested in product_categories):
                 rating = all_purchases[product_key][0]
                 if product_key in main_cust_purchases:
@@ -400,14 +451,9 @@ def recommendation(graph, node_Id, tuple_requested, customers, products, custome
 
     top_products = sorted(possible_products, key=possible_products.get, reverse=True) #reverse order 
     
-    top_20_products = top_products[:5] #TODO: next thing try to choose randomly instead of sort
+    top_5_products = top_products[:5]
 
-    #print("possible products")
-    #print(possible_products)
-    #print("top products")
-    #print(top_products)
-
-    return top_20_products
+    return top_5_products
     
 def standard_recommendation(graph, node_Id, tuple_requested, customers, products, customer_product_weights, customers_int_to_string):
     #find the ten most similar 

@@ -2,6 +2,7 @@ from collections import Counter
 from matplotlib import pyplot as plt
 import snap
 import numpy as np
+import os
 
 def plotDegreeDist(Graph, title, c, x_u, y_d):
     distribution = snap.TIntPrV()
@@ -30,7 +31,7 @@ def plotDegreeDist(Graph, title, c, x_u, y_d):
 
     plt.xlim(1, x_u)
     plt.ylim(y_d, 0.1)
-
+    plt.savefig(title + '.png', bbox_inches='tight')
     plt.show()
 
 def plotDegreeDist_mult(Graph, title, c, x_u, y_d, customers_int_to_string, name_other):
@@ -77,5 +78,5 @@ def plotDegreeDist_mult(Graph, title, c, x_u, y_d, customers_int_to_string, name
 
     plt.xlim(1, x_u)
     plt.ylim(y_d, 0.1)
-
+    plt.savefig(title + '.png', bbox_inches='tight')
     plt.show()
